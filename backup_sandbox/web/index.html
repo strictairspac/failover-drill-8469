@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>备份恢复演练沙盘</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>备份恢复演练沙盘</h1>
+  <div class="meta">
+    <span>全量/增量备份登记 · 依赖链 · 时点恢复演练 · 过期清理</span>
+    <button id="btn-refresh" class="ghost">刷新</button>
+    <button id="btn-cleanup" class="warn">立即清理过期备份</button>
+  </div>
+</header>
+
+<main>
+<section class="grid">
+  <div class="card">
+    <h2>① 登记备份（全量 / 增量及依赖）</h2>
+    <form id="form-backup" class="form">
+      <label>名称 <input name="name" required placeholder="如 full-20261118"></label>
+      <label>类型
+        <select name="kind" id="bk-kind">
+          <option value="full">full 全量</option>
+          <option value="incremental">incremental 增量</option>
+        </select>
+      </label>
+      <label>备份时点 <input name="taken_at" type="datetime-local" step="1" required></label>
+      <label>过期时点（留空=不过期） <input name="expires_at" type="datetime-local" step="1"></label>
+      <label>依赖的父备份（增量必填）
+        <select name="parent_id" id="bk-parent"><option value="">—</option></select>
+      </label>
+      <label>大小 KB <input name="size_kb" type="number" min="0" value="0"></label>
+      <button type="submit">登记备份</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>② 发起时点恢复演练</h2>
+    <form id="form-drill" class="form">
+      <label>演练名称 <input name="label" placeholder="如 drill-夜间核对"></label>
+      <label>恢复目标时点 <input name="target_time" type="datetime-local" step="1" required></label>
+      <button type="submit">发起演练</button>
+    </form>
+    <p class="hint">规则：过期备份不接新演练；恢复链上第一个缺失/过期段即“首个缺段”，演练停在该段之前；正在被演练占用的过期备份会留到最后一场演练结束再清理。</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>备份清单</h2>
+  <table id="table-backups">
+    <thead><tr>
+      <th>ID</th><th>名称</th><th>类型</th><th>备份时点</th><th>过期时点</th>
+      <th>父依赖</th><th>大小KB</th><th>状态</th><th>活跃占用</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>演练队列与恢复结果</h2>
+  <table id="table-drills">
+    <thead><tr>
+      <th>ID</th><th>名称</th><th>目标时点</th><th>状态</th>
+      <th>恢复到的时点</th><th>首个缺段</th><th>占用备份数</th><th>恢复链</th><th></th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>事件审计（清理 / 受理 / 中断恢复）</h2>
+  <table id="table-events">
+    <thead><tr><th>时间</th><th>动作</th><th>来源</th><th>详情</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+</main>
+
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
